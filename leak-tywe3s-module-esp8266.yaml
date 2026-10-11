@@ -1,0 +1,12 @@
+substitutions:
+  hostname: "leak-tywe3s-module-esp8266"  
+  #password_ota: ""
+  #key_api: ""
+  installation_area: "дом -"
+  static_ip: 192.168.100.100
+  board: "board-tuya-tuwe3s"
+  device_http: "leak-tuya-tuwe3s"
+
+
+packages:  
+  - !include device/pir-water-leak-uart-tuya-mqtt/house-bathhouse.yaml

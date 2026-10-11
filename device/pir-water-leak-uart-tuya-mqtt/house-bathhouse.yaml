@@ -1,0 +1,4 @@
+packages:
+  - !include ../common/function/pir-water-leak-uart-tuya-mqtt/general.yaml
+  - !include ../common/function/pir-water-leak-uart-tuya-mqtt/$device_http.yaml 
+  - !include ../common/function/pir-water-leak-uart-tuya-mqtt/$board.yaml

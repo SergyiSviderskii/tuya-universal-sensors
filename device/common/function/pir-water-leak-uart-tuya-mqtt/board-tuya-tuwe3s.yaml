@@ -1,0 +1,26 @@
+substitutions:
+  broker: !secret mqtt_broker
+
+
+esp8266:
+  board: esp01_1m
+  
+  
+wifi:   
+  min_auth_mode: WPA2
+
+  
+uart:
+  tx_pin: TX
+  rx_pin: RX
+  baud_rate: 9600
+  rx_buffer_size: 512 # Огромный буфер убережет байты UART, пока ESP ищет Wi-Fi  
+  
+  
+sensor:
+  # Физический АЦП замер на вашем делителе
+  - platform: adc
+    id: battery_adc
+    pin: $pin_adc 
+    update_interval: never # Отключен постоянный опрос, чтобы не ловить помехи Wi-Fi
+  

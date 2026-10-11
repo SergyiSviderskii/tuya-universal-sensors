@@ -1,0 +1,12 @@
+substitutions:
+  friendly_name: "🚶 PIR"
+  device_name: "Motion"
+  device: "motion"
+  will_message_payload: "OFF"
+  will_message_topic: "$hostname/binary_sensor/motion/state"
+  will_message_retain: "true"
+  pin_adc: VCC
+  # Добавляем эмодзи в подстановки. Так как они в кавычках — это полностью безопасно!
+  publish_message: "🪫 Зарядить аккумулятор!"
+  publish_title: "🚶 Датчик движения $installation_area"
+  internal: "true"

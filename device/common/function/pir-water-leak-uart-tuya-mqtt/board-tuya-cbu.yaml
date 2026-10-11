@@ -1,0 +1,21 @@
+substitutions:
+  broker: !secret mqtt_broker_ip
+  #broker: !secret mqtt_broker 
+  
+
+bk72xx:
+  board: cbu
+  
+  
+uart:
+  tx_pin: TX1
+  rx_pin: RX1
+  baud_rate: 9600 
+  rx_buffer_size: 512 # Огромный буфер убережет байты UART, пока ESP ищет Wi-Fi   
+  
+
+# Виртуальная Батарея
+sensor:
+  - platform: template
+    id: battery_adc
+    update_interval: never

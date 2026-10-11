@@ -1,0 +1,284 @@
+# pir, water-leak (tywe3s) (cbu)
+substitutions:
+  bssid_1: !secret wifi_bssid_house_hall
+  bssid_2: !secret wifi_bssid_house_bedroom_home
+  bssid_3: !secret wifi_bssid_house_bedroom_d
+  bssid_4: !secret wifi_bssid_house_bedroom
+  bssid_5: !secret wifi_bssid_house_living_room
+  bssid_6: !secret wifi_bssid_house_canopy
+  bssid_7: !secret wifi_bssid_house_garret
+  bssid_8: !secret wifi_bssid_house_garage
+  bssid_9: !secret wifi_bssid_bath_garret
+  bssid_10: !secret wifi_bssid_street_bath_left
+  bssid_11: !secret wifi_bssid_plus 
+  wifi_bssid_1_: !secret wifi_bssid_1_ 
+  wifi_bssid_2_: !secret wifi_bssid_2_    
+  wifi_bssid_3_: !secret wifi_bssid_3_    
+  wifi_bssid_4_: !secret wifi_bssid_4_    
+  wifi_bssid_5_: !secret wifi_bssid_5_ 
+  wifi_bssid_6_: !secret wifi_bssid_6_ 
+  wifi_bssid_7_: !secret wifi_bssid_7_    
+  wifi_bssid_8_: !secret wifi_bssid_8_  
+  wifi_bssid_9_: !secret wifi_bssid_9_    
+  wifi_bssid_10_: !secret wifi_bssid_10_ 
+  wifi_bssid_11_: !secret wifi_bssid_11_ 
+
+
+esphome:
+  name: $hostname
+  friendly_name: $friendly_name
+  area: $installation_area
+  on_boot:
+    priority: 1500
+    then:
+      - lambda: |-
+         
+          #ifdef USE_ESP8266
+             
+             // этот блок позволил работать esp8266 на более поздних версиях esphome
+                      
+             //High priority ensures this runs before ESPHome starts the network stack
+          
+            // Disable flash writes to prevent memory wear and optimize boot time
+            WiFi.persistent(false);
+
+            // Force 802.11g mode for stable connection via modern routers/repeaters
+            WiFi.setPhyMode(WIFI_PHY_MODE_11G);
+
+            // Limit TX power to 15dBm to eliminate battery voltage drops and bootloops
+            WiFi.setOutputPower(15.0f);
+          #endif
+
+
+          #if defined(USE_BK72XX) || defined(LT_BK7231N)
+            id(battery_adc).publish_state(3.3f);
+          #endif
+    
+      - binary_sensor.template.publish:
+          id: get_swith_factory
+          state: OFF    
+      - binary_sensor.template.publish:
+          id: my_physical_pir_leak_sensor   
+          state: OFF
+      - sensor.template.publish:
+          id: battery_sm_pir_leak
+          state: "-0.0"  
+      - text_sensor.template.publish:
+          id: point_bssid
+          state: "Нет данных"   
+      - text_sensor.template.publish:
+          id: bssid_point
+          state: "Нет данных"   
+
+
+# Enable logging
+logger:
+  level: NONE
+  #level: ERROR
+  baud_rate: 0
+  
+  
+wifi:  
+  ssid: !secret wifi_ssid_house_bedroom
+  password: !secret wifi_password
+  reboot_timeout: 0s
+  fast_connect: yes # Оставляем ускоренный коннект без сканирования!  
+  post_connect_roaming: false 
+  manual_ip:
+    static_ip: $static_ip        # Наш выбранный адрес вне зоны DHCP
+    gateway: 192.168.0.1       # Адрес самого роутера 
+    subnet: 255.255.255.0
+    dns1: 192.168.0.1           # Первым DNS пишем роутер    
+  #use_address: 192.168.0.199  
+  on_connect: 
+    - then:
+            
+        - lambda: |-
+            #ifdef USE_ESP8266
+             // Этот кусок скомпилируется ТОЛЬКО для ESP8266
+             id(battery_adc).update(); 
+             delay (20);
+            #endif
+
+            id(uart_bus).set_flag_conect_wifi = true;
+
+            
+            id(uart_bus).set_battery_adc = id(battery_adc).state;
+
+ 
+mqtt:
+  broker: $broker
+  username: !secret mqtt_username  
+  password: !secret mqtt_password
+  discovery_unique_id_generator: mac
+  id: mqtt_client
+  log_topic:
+    topic: $hostname/debug
+    qos: 0
+    retain: false 
+  birth_message:
+    topic: $hostname/status
+    payload: online 
+    qos: 0
+    retain: true  
+  will_message:
+    topic: $will_message_topic
+    payload: $will_message_payload  
+    qos: 0
+    retain: $will_message_retain  
+  shutdown_message:  
+  on_connect: 
+    - then: 
+        #это время которое позволяет после коннекта т выдать все 
+        # сущности в homeassistant манипулируя этим временем в зависимости от сети,
+        # можно менять, чтобы добиться лучшего результата в данной сети которым работает устройство
+        # при логировании его увеличивают без логирования уменьшают практика показала 300 - 500
+        - delay: 500ms
+        
+        - lambda: |-  
+            id(uart_bus).set_flag_conect_mqtt = true;  
+    
+ota:
+  - platform: esphome
+    id: my_ota
+    password: "$password_ota"
+    
+    
+external_components:
+  - source:
+      type: local
+      path: components/my_components/tuya_uart
+    refresh: 1d
+    components:
+      - pir_water_leak_uart_tuya_component   
+
+    
+pir_water_leak_uart_tuya_component: 
+  id: uart_bus
+  # Передаем указатель на датчики в  C++ через Python-скрипт
+  pir_leak_sensor: my_physical_pir_leak_sensor 
+  pir_leak_battery: battery_sm_pir_leak
+
+    
+switch:
+  - platform: factory_reset
+    id: restart_swith_factory 
+
+
+binary_sensor:
+  - platform: template
+    name: "${device_name}"
+    device_class: "${device}"
+    # id: sensor_m_pir_leak
+    id: my_physical_pir_leak_sensor  
+    retain: true    
+    
+  # 3. Датчик сброса к заводским настройкам
+  - platform: template
+    id: get_swith_factory  
+    lambda: |-
+      if (id(uart_bus).get_restart_swith_factory) {
+        return true;
+      } else {
+        return {};
+      } 
+    on_press:
+      then:
+        - switch.turn_on: restart_swith_factory      
+        
+
+sensor:
+  - platform: template
+    name: "Battery" 
+    id: battery_sm_pir_leak
+    device_class: battery   
+    state_class: measurement
+    unit_of_measurement: "%"
+    accuracy_decimals: 0 
+    retain: true 
+    update_interval: never 
+    on_value:
+      then:
+        # Проверяем реальную просадку батареи
+        - if:  
+            condition:
+              - lambda: |-  
+                  return (x > -0.0 && (x <= 3.0 || x == 0.0));                
+            then: 
+              - mqtt.publish_json:
+                  topic: /power/supply
+                  payload: |-
+                    // Подстановки подставят строки "🪫 Зарядить аккумулятор!" вместе со значками в JSON
+                    root["message"] = "$publish_message";
+                    root["title"] = "$publish_title";           
+        
+        - if:  
+            condition:
+              lambda: |- 
+                return id(battery_adc).state < 1.5 && id(battery_adc).state > 0.5;
+            then:    
+              - text_sensor.template.publish:
+                  id: template_text
+                  # В обычную строку публикации тоже можно смело ставить значок
+                  state: "Дата проверки батареи"  
+                  
+                  
+  - platform: wifi_signal
+    name: "RSSI" 
+    retain: true 
+    
+text_sensor:
+  - platform: template
+    name: "check battery"
+    id: template_text
+    icon: mdi:battery-alert-variant-outline
+    retain: false
+    internal: $internal
+    update_interval: never   
+    
+  - platform: template 
+    name: "Access point"  
+    id: point_bssid
+    icon: mdi:router-wireless
+    update_interval: never
+    retain: true    
+
+  - platform: version
+    name: "ESPHome Version" 
+    retain: true     
+
+  - platform: wifi_info
+    mac_address:
+      name: "Mac Wifi"  
+    ip_address:
+      icon: mdi:ip  
+      name: "IP"      
+    bssid:
+      name: "BSSID"  
+      id: bssid_point
+      on_raw_value:
+        then:
+          - if:
+              condition: 
+                lambda: |-
+                  return x != "" && x != "Нет данных"; 
+              then:
+                - text_sensor.template.publish:
+                    id: point_bssid
+                    state: !lambda |-
+                      if (strcasecmp(x.c_str(), "${bssid_1}") == 0) return "${wifi_bssid_1_}";
+                      if (strcasecmp(x.c_str(), "${bssid_2}") == 0) return "${wifi_bssid_2_}";
+                      if (strcasecmp(x.c_str(), "${bssid_3}") == 0) return "${wifi_bssid_3_}";
+                      if (strcasecmp(x.c_str(), "${bssid_4}") == 0) return "${wifi_bssid_4_}";
+                      if (strcasecmp(x.c_str(), "${bssid_5}") == 0) return "${wifi_bssid_5_}";
+                      if (strcasecmp(x.c_str(), "${bssid_6}") == 0) return "${wifi_bssid_6_}";
+                      if (strcasecmp(x.c_str(), "${bssid_7}") == 0) return "${wifi_bssid_7_}";  
+                      if (strcasecmp(x.c_str(), "${bssid_8}") == 0) return "${wifi_bssid_8_}";
+                      if (strcasecmp(x.c_str(), "${bssid_9}") == 0) return "${wifi_bssid_9_}";
+                      if (strcasecmp(x.c_str(), "${bssid_10}") == 0) return "${wifi_bssid_10_}";
+                      if (strcasecmp(x.c_str(), "${bssid_11}") == 0) return "${wifi_bssid_11_}";
+                      
+                      return "Неизвестная точка";
+      
+      
+      

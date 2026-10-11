@@ -1,0 +1,13 @@
+substitutions:
+  hostname: "pir-free-tuwe3s" 
+  password_ota: "jO2thM0jwX0312j0IHfhh2A6JdY7Y6R5"  
+  #key_api: "jO2thM0jwX0312j0IHfhh2A6JdYpBj9Tuoyap/cS8Ss="
+  installation_area: "дом - "
+#   wifi_ssid: !secret wifi_ssid_house_bedroom
+#   wifi_password: !secret wifi_password_n
+  static_ip: 192.168.0.191
+  board: "board-tuya-tuwe3s"
+  device_http: "pir-tuya-tuwe3s"
+
+packages:  
+  - !include device/pir-water-leak-uart-tuya-mqtt/house-bathhouse.yaml

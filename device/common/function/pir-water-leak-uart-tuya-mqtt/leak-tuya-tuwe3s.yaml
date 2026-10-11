@@ -1,0 +1,11 @@
+substitutions:
+  friendly_name: "💧 Утечка воды"
+  device_name: "Leak"
+  device: "moisture"
+  will_message_payload: ""
+  will_message_topic: "$hostname/binary_sensor/leak/state"
+  will_message_retain: "false"
+  pin_adc: A0
+  publish_message: "🪫 Заменить батарейки"
+  publish_title: "💧 Датчик утечки воды $installation_area"  
+  internal: "false"

@@ -1,0 +1,12 @@
+substitutions:
+  hostname: "pir-free-cbu" 
+  password_ota: "GicqrPcFl/1mnRGKUzxoQeqG1EoXbBEq" 
+  installation_area: "дом - ..."
+  #key_api: "aoB/d6a9RFXcn86fv+//wlDqVUSEjA+JYjGEynvqlG8="  
+  static_ip: 192.168.0.199
+  board: "board-tuya-cbu"
+  device_http: "pir-board-tuya-cbu"
+
+
+packages:  
+  - !include device/pir-water-leak-uart-tuya-mqtt/house-bathhouse.yaml
