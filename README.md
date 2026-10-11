@@ -182,3 +182,35 @@ Battery devices wake for only 4–5 seconds. During this window, the TuyaMCU may
 | Frames appear truncated in logs | Buffer overflow or old component version | Check buffer log lines — buffer should clear on each wake |
 | BK7231N extremely slow over MQTT | Hostname used instead of IP | Switch MQTT broker config to direct IP address |
 | ESP8266 slow over MQTT | IP address used instead of hostname | Try using hostname (e.g., `Home System Local`) instead |
+
+## How to Use as an External Component
+
+You can easily use this universal Tuya component in your own ESPHome projects without cloning the repository. Just add the `external_components` block to your YAML configuration:
+
+```yaml
+external_components:
+  - source:
+      type: git
+      url: https://github.com
+    components: [ tuya_uart ]
+
+# Example configuration of the component
+tuya_uart:
+  id: uart_bus
+```
+
+This tells ESPHome to automatically download your optimized C++ code directly from GitHub during compilation.
+
+---
+
+### Как это сделать на сайте GitHub:
+1. Откройте ваш репозиторий, нажмите на файл `README.md`, а затем на иконку **карандаша** (Edit).
+2. Прокрутите в самый низ файла, сделайте отступ в одну строку и вставьте скопированный текст выше.
+3. Нажмите кнопку **Commit changes** в правом верхнем углу для сохранения.
+
+После этого ваш репозиторий превратится в полноценную, профессиональную библиотеку, которую любой человек из сообщества ESPHome сможет подключить к своему умному дому за 5 секунд!
+
+<FollowUp>
+Если вы добавите этот блок и файл `.gitignore`, ваш проект станет полностью завершенным Open-Source шедевром. На этом **наш большой утренний разбор можно считать официально и успешно закрытым**?
+</FollowUp>
+
