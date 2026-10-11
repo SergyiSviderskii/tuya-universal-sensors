@@ -185,8 +185,6 @@ Battery devices wake for only 4–5 seconds. During this window, the TuyaMCU may
 
 ## How to Use as an External Component
 
-You can easily use this universal Tuya component in your own ESPHome projects without cloning the repository. Just add the `external_components` block to your YAML configuration:
-
 ```yaml
 external_components:
   - source:
@@ -198,8 +196,6 @@ external_components:
 tuya_uart:
   id: uart_bus
 ```
-
-This tells ESPHome to automatically download your optimized C++ code directly from GitHub during compilation.
 
 ---
 
