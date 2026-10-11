@@ -1,0 +1,113 @@
+- id: ''
+  alias: Объединенная тревога по времени
+  description: 'Автоматизация посылки уведомления по времени датчиков leak water, проверяет 
+                когда нужно активировать устройство
+                (датчики leak-water tuya -> esphome) для проверки батареи и смены даты'
+  triggers:
+  - trigger: time
+    at: '09:00:00'
+  - trigger: time
+    at: '15:00:00'    
+  - trigger: time
+    at: '21:00:00'   
+  condition: []
+  action: 
+  - if:
+    - condition: template
+      value_template: "{{ states('binary_sensor.utechka_vody_bania_podval_vlaga', 'off' ) == 'on' }}"
+    then:
+    - action: script.notify_message 
+      metadata: {}
+      data:
+        message: "{{ area_name('binary_sensor.utechka_vody_bania_podval_vlaga') }}" 
+        title: "Обнаружена - {{ state_attr('binary_sensor.utechka_vody_bania_podval_vlaga', 'friendly_name') }}"
+  - if:
+    - condition: template
+      value_template: "{{ states('binary_sensor.dom_kukhnia_moika_utechka_vody_vlaga', 'off' ) == 'on' }}"
+    then:
+    - action: script.notify_message 
+      metadata: {}
+      data:
+        message: "{{ area_name('binary_sensor.dom_kukhnia_moika_utechka_vody_vlaga') }}" 
+        title: "Обнаружена - {{ state_attr('binary_sensor.dom_kukhnia_moika_utechka_vody_vlaga', 'friendly_name') }}"
+  - if:
+    - condition: template
+      value_template: "{{ states('binary_sensor.dom_letniaia_kukhnia_moika_utechka_vody_vlaga', 'off' ) == 'on' }}"
+    then:
+    - action: script.notify_message 
+      metadata: {}
+      data:
+        message: "{{ area_name('binary_sensor.dom_letniaia_kukhnia_moika_utechka_vody_vlaga') }}" 
+        title: "Обнаружена - {{ state_attr('binary_sensor.dom_letniaia_kukhnia_moika_utechka_vody_vlaga', 'friendly_name') }}"
+  - if:
+    - condition: template
+      value_template: "{{ states('binary_sensor.utechka_vody_dom_podval_vlaga', 'off' ) == 'on' }}"
+    then:
+    - action: script.notify_message 
+      metadata: {}
+      data:
+        message: "{{ area_name('binary_sensor.utechka_vody_dom_podval_vlaga') }}" 
+        title: "Обнаружена - {{ state_attr('binary_sensor.utechka_vody_dom_podval_vlaga', 'friendly_name') }}"
+  - if:
+    - condition: template
+      value_template: "{{ states('binary_sensor.dom_vannaia_umyvalnik_utechka_vody_vlaga', 'off' ) == 'on' }}"
+    then:
+    - action: script.notify_message 
+      metadata: {}
+      data:
+        message: "{{ area_name('binary_sensor.dom_vannaia_umyvalnik_utechka_vody_vlaga') }}" 
+        title: "Обнаружена - {{ state_attr('binary_sensor.dom_vannaia_umyvalnik_utechka_vody_vlaga', 'friendly_name') }}"
+  - if:
+    - condition: template
+      value_template: "{{ states('binary_sensor.dom_vannaia_unitaz_utechka_vody_vlaga', 'off' ) == 'on' }}"
+    then:
+    - action: script.notify_message 
+      metadata: {}
+      data:
+        message: "{{ area_name('binary_sensor.dom_vannaia_unitaz_utechka_vody_vlaga') }}" 
+        title: "Обнаружена - {{ state_attr('binary_sensor.dom_vannaia_unitaz_utechka_vody_vlaga', 'friendly_name') }}"
+  - if:
+    - condition: template
+      value_template: >
+        {{ (as_timestamp(now()) | int() - as_timestamp(states('sensor.utechka_vody_dom_vannaia_umyvalnik_batareia_proverialas'), 
+            as_timestamp(now()) | int())) >= 31536000 }}
+    then:
+    - action: script.notify_message 
+      metadata: {}
+      data:
+        message: "{{ area_name('sensor.utechka_vody_dom_vannaia_umyvalnik_batareia_proverialas') }}" 
+        title: Сбросить датчик утечки воды, для проверки батареи
+  - if:
+    - condition: template
+      value_template: >
+        {{ (as_timestamp(now()) | int() - as_timestamp(states('sensor.utechka_vody_dom_vannaia_unitaz_batareia_proverialas'), 
+            as_timestamp(now()) | int())) >= 31536000 }}
+    then:
+    - action: script.notify_message 
+      metadata: {}
+      data:
+        message: "{{ area_name('sensor.utechka_vody_dom_vannaia_unitaz_batareia_proverialas') }}" 
+        title: Сбросить датчик утечки воды, для проверки батареи
+  - if:
+    - condition: template
+      value_template: >
+        {{ (as_timestamp(now()) | int() - as_timestamp(states('sensor.utechka_vody_dom_kukhnia_moika_batareia_proverialas'), 
+            as_timestamp(now()) | int())) >= 31536000 }}
+    then:
+    - action: script.notify_message 
+      metadata: {}
+      data:
+        message: "{{ area_name('sensor.utechka_vody_dom_kukhnia_moika_batareia_proverialas') }}" 
+        title: Сбросить датчик утечки воды, для проверки батареи
+  - if:
+    - condition: template
+      value_template: >
+        {{ (as_timestamp(now()) | int() - as_timestamp(states('sensor.utechka_vody_dom_letniaia_kukhnia_moika_batareia_proverialas'), 
+            as_timestamp(now()) | int())) >= 31536000 }}
+    then:
+    - action: script.notify_message 
+      metadata: {}
+      data:
+        message: "{{ area_name('sensor.dom_letniaia_kukhnia_moika_utechka_vody_batareia_proverialas') }}" 
+        title: Сбросить датчик утечки воды, для проверки батареи
+  mode: single 

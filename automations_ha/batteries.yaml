@@ -1,0 +1,39 @@
+    - id: ''
+      alias: Дата последней проверки батареи датчика утечки воды
+      description: ''
+      trigger:
+        - platform: mqtt
+          topic: leak-water-house-bathroom-toile/sensor/check_battery/state
+          payload: "Дата проверки батареи"
+        - platform: mqtt
+          topic: leak-water-house-bathroom-sink/sensor/check_battery/state
+          payload: "Дата проверки батареи"
+        - platform: mqtt
+          topic: leak-water-house-kitchen-sink/sensor/check_battery/state
+          payload: "Дата проверки батареи"
+        - platform: mqtt
+          topic: leak-water-house-sum-cuisi-sink/sensor/check_battery/state
+          payload: "Дата проверки батареи"
+      action:
+        - service: mqtt.publish
+          data:
+            topic: "{{ trigger.topic }}"
+            payload: "📅 {{ now().strftime('%Y-%m-%d') }}"
+            retain: true
+      mode: single
+
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
